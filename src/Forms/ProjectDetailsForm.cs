@@ -36,7 +36,7 @@ namespace Azure.Migrate.Export.Forms
             AuthenticationResult authResult = null;
             try
             {
-                authResult = await AzureAuthenticationHandler.CommonLogin();
+                authResult = await AzureAuthenticationHandler.CommonLogin(NativeWindow.FromHandle(this.Handle));
             }
             catch (Exception exCommonLogin)
             {
@@ -511,7 +511,7 @@ namespace Azure.Migrate.Export.Forms
 
             try
             {
-                authResult = await AzureAuthenticationHandler.TenantLogin(TenantIdTextBox.Text);
+                authResult = await AzureAuthenticationHandler.TenantLogin(TenantIdTextBox.Text, NativeWindow.FromHandle(this.Handle));
             }
             catch (Exception exTenantLogin)
             {

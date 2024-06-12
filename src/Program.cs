@@ -1,4 +1,5 @@
 ﻿using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Broker;
 using System;
 using System.Windows.Forms;
 
@@ -13,6 +14,7 @@ namespace Azure.Migrate.Export
         public static string CommonAuthorityEndpoint = "https://login.microsoftonline.com/common/oauth2/authorize";
         public static string TenantAuthorityEndpoint = "https://login.microsoftonline.com/_tenantID/oauth2/authorize";
         public static IPublicClientApplication clientApp;
+        private static NativeWindow NativeWindow;
 
         /// <summary>
         /// The main entry point for the application.
@@ -20,7 +22,6 @@ namespace Azure.Migrate.Export
         [STAThread]
         static void Main()
         {
-            InitializeCommonAuthentication();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new AzureMigrateExportMainForm());
@@ -28,21 +29,40 @@ namespace Azure.Migrate.Export
 
         public static IPublicClientApplication PublicClientApp { get { return clientApp; } }
 
-        public static void InitializeCommonAuthentication()
+        public static void InitializeCommonAuthentication(NativeWindow nativeWindow)
         {
+            NativeWindow = nativeWindow;
+
             clientApp = PublicClientApplicationBuilder.Create(PowerShellClientId)
                                                       .WithAuthority(new Uri(CommonAuthorityEndpoint))
+                                                      .WithParentActivityOrWindow(GetWindowHandle)
+                                                      .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
+                                                      {
+                                                          Title = "Azure Migrate Export",
+                                                      })
                                                       .Build();
             TokenCacheHelper.EnableSerialization(clientApp.UserTokenCache);
         }
 
-        public static void InitializeTenantAuthentication(string tenantID)
+        public static void InitializeTenantAuthentication(string tenantID, NativeWindow nativeWindow)
         {
+            NativeWindow = nativeWindow;
+
             string finalAuthorityEndpoint = TenantAuthorityEndpoint.Replace("_tenantID", tenantID);
             clientApp = PublicClientApplicationBuilder.Create(PowerShellClientId)
                                                       .WithAuthority(new Uri(finalAuthorityEndpoint))
+                                                      .WithParentActivityOrWindow(GetWindowHandle)
+                                                      .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
+                                                      {
+                                                          Title = "Azure Migrate Export",
+                                                      })
                                                       .Build();
             TokenCacheHelper.EnableSerialization(clientApp.UserTokenCache);
+        }
+
+        private static IntPtr GetWindowHandle()
+        {
+            return NativeWindow.Handle;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Azure.Migrate.Export.Authentication
 {
@@ -12,14 +13,15 @@ namespace Azure.Migrate.Export.Authentication
         {
             "https://management.azure.com/.default"
         };
-        public static async Task<AuthenticationResult> CommonLogin()
+        public static async Task<AuthenticationResult> CommonLogin(NativeWindow nativeWindow)
         {
+            Program.InitializeCommonAuthentication(nativeWindow);
             return await Login();
         }
 
-        public static async Task<AuthenticationResult> TenantLogin(string tenantID)
+        public static async Task<AuthenticationResult> TenantLogin(string tenantID, NativeWindow nativeWindow)
         {
-            Program.InitializeTenantAuthentication(tenantID);
+            Program.InitializeTenantAuthentication(tenantID, nativeWindow);
             return await Login();
         }
 
